@@ -62,6 +62,8 @@ def result(board, action):
     if action in actions(newBoard): 
         newBoard[action[0]][action[1]] = player(newBoard)
         return newBoard
+    print(action)
+    print(board)
     raise Exception("Action not valid.")
 
 def square_combis(lst, n):
@@ -106,25 +108,34 @@ def minimax(board):
     if terminal(board):
         return a
 
-    isX = player(board) == X 
-    v = 2
-    sign = 1 if isX else -1
+    maximize = player(board) == X 
+    sign = -1 if maximize else 1
+    old_value = 2*sign
         
     for action in actions(board):
-        newValue = minmaxvalue(result(board, action), isX)
-        if v*sign <= newValue*sign: 
-            a = action
-            v = newValue
+        # The maximizing player picks action a in Actions(s) that
+        # produces the highest value of Min-Value(Result(s, a)).
+        # The minimizing player picks action a in Actions(s) that 
+        # produces the lowest value of Max-Value(Result(s, a)).
+        newValue = minmaxvalue(result(board, action), maximize)
+        if(maximize):
+            if old_value <= newValue: 
+                a = action
+                old_value = newValue
+        else:
+            if  old_value >= newValue: 
+                a = action
+                old_value= newValue
     return a
 
           
-def minmaxvalue(board, useMin):
+def minmaxvalue(board, minValue):
     if terminal(board):
         return utility(board)
-    v = 2 if useMin else -2
+    v = 2 if minValue else -2
     for action in actions(board):
         # if min-value call: min(v,max-value)
-        r = minmaxvalue(result(board, action), not useMin)
-        v = min(v, r) if useMin else max(v,r)
+        r = minmaxvalue(result(board, action), not minValue)
+        v = min(v, r) if minValue else max(v, r)
     return v
     
